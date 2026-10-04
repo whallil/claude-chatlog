@@ -63,10 +63,21 @@ grep -rn 'rate limit' ~/.claude/chatlogs --include='*.md'
 grep -n '<key>' ~/.claude/projects/<project-slug>/<session-id>.jsonl
 ```
 
-To let Claude use it, add a line like this to your `~/.claude/CLAUDE.md`:
+### Claude uses it on its own
+
+The plugin ships a skill, `chat-history`, so Claude knows the index exists
+without being told. When it needs context from an earlier session (what you
+asked, what was decided, when something came up) it searches the index, reads
+only the records it needs, and follows a key into the raw transcript when it
+needs the detail. The skill also tells it how to hand that lookup to a
+subagent. You can prompt it directly too: "check our chat history for what we
+decided about caching".
+
+Nothing needs adding to your `CLAUDE.md`. If you want Claude to reach for it
+more readily, one line is enough:
 
 ```
-**Chat history index:** `~/.claude/chatlogs/<project-slug>/<session-id>.md` — `[UTC timestamp]|USER|…` / `[UTC timestamp]|CLAUDE|…`, one line per message. For context from an earlier session, `grep -rn` it first; a hit's timestamp greps into `~/.claude/projects/<project-slug>/<session-id>.jsonl` for full detail.
+When you need context from an earlier session, use the chat-history skill before asking me to repeat it.
 ```
 
 ### Slash commands

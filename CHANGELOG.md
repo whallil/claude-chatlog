@@ -8,6 +8,9 @@ All notable changes to this project are documented here. The format is based on
 
 ## [0.2.0] - 2026-10-04
 ### Added
+- A `chat-history` skill, so Claude knows the index exists and how to search it,
+  read from it, follow a key into the raw transcript, and brief a subagent to do
+  the same.
 - Slash commands: `/chatlog:search <phrase>`, `/chatlog:render [session] [key ...]`
   and `/chatlog:extract [session]`.
 - `search.py`: case-insensitive phrase search over the index, this project by

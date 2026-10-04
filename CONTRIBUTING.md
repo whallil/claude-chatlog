@@ -10,6 +10,7 @@ plugins/chatlog/
   .claude-plugin/plugin.json           # plugin manifest
   hooks/hooks.json                     # registers the Stop and SessionEnd hooks
   commands/                            # /chatlog:search, /chatlog:render, /chatlog:extract
+  skills/chat-history/SKILL.md         # tells Claude the index exists and how to use it
   scripts/
     core.py                            # the filter, line format, bookmark, lag handling
     hook.py                            # hook entry point: prints nothing, always exits 0

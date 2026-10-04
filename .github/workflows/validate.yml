@@ -19,5 +19,8 @@ jobs:
           python3 -c "import json; json.load(open('plugins/chatlog/hooks/hooks.json')); print('hooks.json OK')"
       - name: Compile Python scripts
         run: python3 -m py_compile plugins/chatlog/scripts/*.py
+      - name: Check SKILL.md frontmatter
+        run: |
+          head -1 plugins/chatlog/skills/chat-history/SKILL.md | grep -qx -- '---' && echo "SKILL.md frontmatter OK"
       - name: Run tests
         run: python3 -m unittest discover -s plugins/chatlog/tests
