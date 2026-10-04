@@ -1,0 +1,12 @@
+{
+  "name": "chatlog",
+  "version": "0.1.0",
+  "description": "Keeps a searchable index of every Claude Code session's dialogue: one line per message, only the prompts you typed and the text Claude replied with. Tool calls, tool results, thinking, system reminders and hook output are left out. Each line's timestamp key greps straight into the raw transcript.",
+  "author": {
+    "name": "Thistle Intelligence, LLC",
+    "email": "licensing@thistleintelligence.com"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/whallil/claude-chatlog",
+  "keywords": ["chat-log", "transcript", "history", "hook", "search", "index", "grep", "session", "context"]
+}

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "claude-chatlog",
+  "description": "The chatlog plugin for Claude Code, published by Thistle Intelligence, LLC.",
+  "owner": {
+    "name": "Thistle Intelligence, LLC",
+    "email": "licensing@thistleintelligence.com"
+  },
+  "plugins": [
+    {
+      "name": "chatlog",
+      "description": "Keeps a searchable index of every session's dialogue: one line per message, only your prompts and Claude's text replies, keyed by a timestamp that greps into the raw transcript.",
+      "author": {
+        "name": "Thistle Intelligence, LLC"
+      },
+      "category": "productivity",
+      "source": "./plugins/chatlog",
+      "homepage": "https://github.com/whallil/claude-chatlog"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+name: validate
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Validate JSON manifests
+        run: |
+          python3 -c "import json; json.load(open('.claude-plugin/marketplace.json')); print('marketplace.json OK')"
+          python3 -c "import json; json.load(open('plugins/chatlog/.claude-plugin/plugin.json')); print('plugin.json OK')"
+          python3 -c "import json; json.load(open('plugins/chatlog/hooks/hooks.json')); print('hooks.json OK')"
+      - name: Compile Python scripts
+        run: python3 -m py_compile plugins/chatlog/scripts/*.py
+      - name: Run tests
+        run: python3 -m unittest discover -s plugins/chatlog/tests

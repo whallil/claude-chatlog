@@ -1,0 +1,50 @@
+name: Bug report
+description: Something is missing from the log, leaked into it, or the hook misbehaved
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report! Chat logs and transcripts contain your conversations — please redact anything private before pasting. For security issues, follow SECURITY.md instead of filing a public issue.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you expect in the log, and what did you get?
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. In a session, ...
+        2. ...
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Claude Code version
+      description: The transcript format changes between releases, so this matters.
+      placeholder: "2.1.x  (run: claude --version)"
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: OS and Python version
+      placeholder: "e.g. Debian 12, Python 3.11"
+    validations:
+      required: true
+  - type: textarea
+    id: event
+    attributes:
+      label: The transcript event involved (redacted)
+      description: If something was dropped or leaked, the JSON line from the .jsonl transcript is the most useful thing you can attach. Replace message text with placeholders.
+      render: json
+  - type: textarea
+    id: errors
+    attributes:
+      label: Contents of ~/.claude/chatlogs/.state/errors.log (if it exists)
+      render: shell

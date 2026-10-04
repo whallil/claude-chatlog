@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Read the docs first
+    url: https://github.com/whallil/claude-chatlog#readme
+    about: The README covers install, the line format, the filtering rules, and known limits.
+  - name: Report a security issue (private)
+    url: https://github.com/whallil/claude-chatlog/security/advisories/new
+    about: Report vulnerabilities privately — please don't open a public issue.
