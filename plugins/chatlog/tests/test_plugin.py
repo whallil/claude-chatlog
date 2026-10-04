@@ -112,3 +112,27 @@ class HookCommandTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class SkillTest(unittest.TestCase):
+    """The skill is how Claude learns the index exists and how to query it."""
+
+    def setUp(self):
+        path = os.path.join(PLUGIN, "skills", "chat-history", "SKILL.md")
+        with open(path, encoding="utf-8") as handle:
+            self.body = handle.read()
+
+    def test_frontmatter_names_and_describes_the_skill(self):
+        self.assertTrue(self.body.startswith("---\nname: chat-history\n"))
+        header = self.body.split("---")[1]
+        self.assertIn("description:", header)
+        self.assertIn("earlier", header)
+
+    def test_it_points_at_scripts_that_exist(self):
+        for name in ("search.py", "render.py"):
+            with self.subTest(name=name):
+                self.assertIn("scripts/" + name, self.body)
+                self.assertTrue(os.path.isfile(os.path.join(PLUGIN, "scripts", name)))
+
+    def test_it_covers_handing_the_lookup_to_a_subagent(self):
+        self.assertIn("subagent", self.body.lower())

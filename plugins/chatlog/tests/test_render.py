@@ -42,13 +42,21 @@ class RenderCliTest(unittest.TestCase):
             timeout=30,
         )
 
-    def test_whole_log_renders_as_markdown_sections(self):
-        result = self.run_cli(self.log_file)
+    def test_whole_log_renders_as_markdown_sections_into_a_file(self):
+        target = os.path.join(self.home, "session.md")
+        result = self.run_cli(self.log_file, "--out", target)
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn("## You", result.stdout)
-        self.assertIn("## Claude", result.stdout)
-        self.assertIn(ts(2), result.stdout)
-        self.assertIn("| a | b |\n|---|---|\n| 1 | 2 |", result.stdout)
+        with open(target, encoding="utf-8") as handle:
+            rendered = handle.read()
+        self.assertIn("## You", rendered)
+        self.assertIn("## Claude", rendered)
+        self.assertIn(ts(2), rendered)
+        self.assertIn("| a | b |\n|---|---|\n| 1 | 2 |", rendered)
+
+    def test_listing_shows_control_characters_escaped(self):
+        result = self.run_cli(self.log_file)
+        self.assertNotIn("\x1b", result.stdout)
+        self.assertIn("\\x1b[31mred", result.stdout)
 
     def test_raw_key_lookup_returns_the_exact_original_text(self):
         result = self.run_cli(self.log_file, ts(2), "--raw")

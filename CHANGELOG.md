@@ -6,6 +6,28 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-04
+### Added
+- A `chat-history` skill, so Claude knows the index exists and how to search it,
+  read from it, follow a key into the raw transcript, and brief a subagent to do
+  the same.
+- Slash commands: `/chatlog:search <phrase>`, `/chatlog:render [session] [key ...]`
+  and `/chatlog:extract [session]`.
+- `search.py`: case-insensitive phrase search over the index, this project by
+  default or every project with `--all`; one truncated line per hit, capped.
+- Scoped rendering: `--since` / `--until` (spans such as `2h` and `7d`, `today`,
+  `yesterday`, clock times, ISO dates; local time), `--first N`, `--last N` and
+  `--list`. A time range with no session named spans every session of the
+  project. `/chatlog:render` accepts the request in plain words.
+- `extract.py` and `render.py` default to the session running in the current
+  directory when no session is named.
+
+### Changed
+- `render.py` no longer prints a whole session by default. Without a key it lists
+  the most recent records one line each, full text is capped at about 20,000
+  characters (`--max-chars`), and `--out FILE` writes a selection to a file. Its output usually lands in a conversation, and
+  sessions can be very long.
+
 ## [0.1.0] - 2026-10-04
 ### Added
 - `Stop` and `SessionEnd` hooks that append each turn's dialogue to

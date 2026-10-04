@@ -4,6 +4,7 @@
 Uses the same filtering as the live hook, for backfilling or repairing a
 single session on demand::
 
+    extract.py                           # the session running in this directory
     extract.py a1b2c3d4                  # session id, or a unique prefix
     extract.py path/to/session.jsonl
     extract.py a1b2c3d4 --stdout         # print instead of writing
@@ -24,6 +25,11 @@ import core
 
 def find_transcript(session):
     """Resolve a transcript path, a session id, or a unique prefix of one."""
+    if session is None:
+        current = core.current_transcript()
+        if current is None:
+            sys.exit("extract: no transcript found for a session in this directory")
+        return current
     if os.path.isfile(session):
         return session
     pattern = os.path.join(
@@ -46,7 +52,9 @@ def main(argv=None):
     )
     parser.add_argument(
         "session",
-        help="a session id, a unique prefix of one, or the path to a .jsonl transcript",
+        nargs="?",
+        help="a session id, a unique prefix of one, or the path to a .jsonl "
+        "transcript (default: the session running in this directory)",
     )
     where = parser.add_mutually_exclusive_group()
     where.add_argument(
