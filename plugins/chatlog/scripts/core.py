@@ -21,7 +21,7 @@ import os
 import re
 import time
 from collections import namedtuple
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 try:
     import fcntl
@@ -117,6 +117,42 @@ def _canonical(moment):
 def now_key():
     """Return the current instant in the transcript's own timestamp format."""
     return _canonical(datetime.now(timezone.utc))
+
+
+_SPAN_RE = re.compile(r"(\d+)\s*([mhdw])")
+_CLOCK_RE = re.compile(r"(\d{1,2})(?::(\d{2}))?")
+_SPAN_UNITS = {"m": "minutes", "h": "hours", "d": "days", "w": "weeks"}
+
+
+def parse_when(text, now=None):
+    """Turn a time expression into a key-format instant.
+
+    Accepts a span back from now (``90m``, ``2h``, ``7d``, ``1w``), ``now``,
+    ``today``, ``yesterday``, a clock time today (``9``, ``09:45``), or an ISO
+    date or date-time. Everything without an explicit offset is local time.
+
+    :raises ValueError: If ``text`` is none of those.
+    """
+    now = now or datetime.now().astimezone()
+    word = text.strip().lower()
+    midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    span = _SPAN_RE.fullmatch(word)
+    clock = _CLOCK_RE.fullmatch(word)
+    if span:
+        moment = now - timedelta(**{_SPAN_UNITS[span.group(2)]: int(span.group(1))})
+    elif word == "now":
+        moment = now
+    elif word == "today":
+        moment = midnight
+    elif word == "yesterday":
+        moment = midnight - timedelta(days=1)
+    elif clock:
+        moment = midnight.replace(hour=int(clock.group(1)), minute=int(clock.group(2) or 0))
+    else:
+        moment = datetime.fromisoformat(text.strip().replace("Z", "+00:00"))
+        if moment.tzinfo is None:
+            moment = moment.replace(tzinfo=now.tzinfo)
+    return _canonical(moment)
 
 
 def _record_key(event):
@@ -446,6 +482,39 @@ def config_dir():
 def chatlog_root():
     """Return the directory logs are written under."""
     return os.environ.get("CLAUDE_CHATLOG_DIR") or os.path.join(config_dir(), "chatlogs")
+
+
+def project_slug(cwd=None):
+    """Return the directory name Claude Code uses for a project under
+    ``projects/``: the absolute path with every non-alphanumeric made a dash."""
+    return re.sub(r"[^A-Za-z0-9]", "-", os.path.abspath(cwd or os.getcwd()))
+
+
+def current_transcript():
+    """Find the transcript of the session running in this directory.
+
+    Uses ``CLAUDE_SESSION_ID`` when Claude Code provides it, else the most
+    recently written transcript of the project.
+
+    :returns: The path, or None if the project has no transcripts.
+    """
+    project = os.environ.get("CLAUDE_PROJECT_DIR") or os.getcwd()
+    folder = os.path.join(config_dir(), "projects", project_slug(project))
+    session = os.environ.get("CLAUDE_SESSION_ID")
+    if session and os.path.isfile(os.path.join(folder, session + ".jsonl")):
+        return os.path.join(folder, session + ".jsonl")
+    try:
+        names = [name for name in os.listdir(folder) if name.endswith(".jsonl")]
+    except OSError:
+        return None
+    paths = [os.path.join(folder, name) for name in names]
+    return max(paths, key=os.path.getmtime) if paths else None
+
+
+def preview(text, width=80):
+    """Flatten ``text`` to one line of at most ``width`` characters."""
+    flat = escape(" ".join(text.split()))
+    return flat if len(flat) <= width else flat[: width - 1] + "\u2026"
 
 
 def _safe_name(name):

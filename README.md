@@ -69,18 +69,39 @@ To let Claude use it, add a line like this to your `~/.claude/CLAUDE.md`:
 **Chat history index:** `~/.claude/chatlogs/<project-slug>/<session-id>.md` — `[UTC timestamp]|USER|…` / `[UTC timestamp]|CLAUDE|…`, one line per message. For context from an earlier session, `grep -rn` it first; a hit's timestamp greps into `~/.claude/projects/<project-slug>/<session-id>.jsonl` for full detail.
 ```
 
-Two helper scripts ship in the plugin's `scripts/` directory:
+### Slash commands
 
-```bash
-S=$(dirname "$(find ~/.claude/plugins -path '*chatlog/*/scripts/render.py' | tail -1)")
+| Command | What it does |
+|---|---|
+| `/chatlog:search <phrase>` | Find a phrase in this project's history (`--all` for every project). One line per hit, newest first, capped at 20 (`--limit N`). |
+| `/chatlog:render [what to show]` | With nothing: list the current session's 30 most recent records, one line each. Otherwise say what you want in plain words or flags, scoped by session, key, time range or count. |
+| `/chatlog:extract [session]` | Rebuild a session's log from its raw transcript. |
 
-python3 $S/render.py <session-id>                # a session as readable markdown
-python3 $S/render.py <session-id> <key> --raw    # one record's exact original text
-python3 $S/extract.py <session-id>               # rebuild one session's log
-```
+`session` is a session id or a unique prefix of one; leave it out to mean the
+session you are in. `key` may be a prefix too (`2026-10-04T14:25` selects that
+minute).
 
-`<session-id>` may be a unique prefix. `<key>` may be a prefix too
-(`2026-10-04T14:25` selects that minute).
+`/chatlog:render` takes plain words and turns them into a scoped query:
+
+| You type | It runs |
+|---|---|
+| `/chatlog:render last week` | `render.py --since 7d` |
+| `/chatlog:render first 10 lines from today` | `render.py --since today --first 10` |
+| `/chatlog:render between 9 and 10 but only 50 lines` | `render.py --since 9 --until 10 --last 50` |
+| `/chatlog:render what did we cover yesterday` | `render.py --since yesterday --until today --list` |
+
+Times are local: a span back from now (`90m`, `2h`, `7d`, `1w`), `today`,
+`yesterday`, a clock time today (`9`, `09:45`), or an ISO date or date-time. A
+time range with no session named covers every session of the current project,
+in time order.
+
+Command output lands in the conversation, and sessions can be very long, so
+nothing prints a whole session unasked: full text stops after about 20,000
+characters and says how many records it left out. `--list` gives one line per
+record, and `--out FILE` writes the selection to a file as markdown.
+
+The commands run three scripts in the plugin's `scripts/` directory
+(`search.py`, `render.py`, `extract.py`), which also work from a shell.
 
 ## The line format
 
@@ -207,7 +228,7 @@ Headless `claude -p` runs are logged too. Runs with `--bare` or
 
 ## Backfill or repair one session
 
-`extract.py <session-id | path.jsonl>` runs the same filter as the hook over a
+`/chatlog:extract` (or `extract.py <session-id | path.jsonl>`) runs the same filter as the hook over a
 whole transcript and ignores the cutoff. By default it replaces that session's
 log and moves the bookmark to the end of the transcript, so a session that is
 still running carries on without duplicates. `--stdout` prints instead, and
